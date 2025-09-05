@@ -6,178 +6,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat UI</title>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="{{ asset('css/chat.css') }}">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
 
-        /* Scrolling mechanism */
-        /* width */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        /* Track */
-        ::-webkit-scrollbar-track {
-            background: #e0eaf6;
-        }
-
-        /* Handle */
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-
-        /* Handle on hover */
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        .chat-container {
-            width: 400px;
-            height: 600px;
-            max-height: 600px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .chat-header {
-            padding: 15px;
-            background: #0078ff;
-            color: #fff;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .chat-message-container {
-            height: 510px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 0px;
-            overflow: hidden;
-        }
-
-        .chat-messages {
-            flex: 1;
-            /* takes remaining space */
-            padding: 15px;
-            overflow-y: auto;
-            /* enables vertical scroll */
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            height: 600px;
-            /* max-height: 90%; */
-            /* keeps inside the container */
-        }
-
-        .message {
-            max-width: 70%;
-            padding: 10px 15px;
-            border-radius: 18px;
-            line-height: 1.4;
-        }
-
-        .message.sent {
-            background: #0078ff;
-            color: #fff;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message.received {
-            background: #e5e5ea;
-            color: #000;
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-        }
-
-        .chat-input {
-            display: flex;
-            border-top: 1px solid #ddd;
-        }
-
-        .chat-input input {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            outline: none;
-            font-size: 14px;
-        }
-
-        .chat-input button {
-            background: #0078ff;
-            color: white;
-            border: none;
-            padding: 0 20px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .chat-input button:hover {
-            background: #005fcc;
-        }
-
-        /* Popup style */
-        .popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .popup-content {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .popup-content input {
-            padding: 10px;
-            margin-top: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            width: 80%;
-        }
-
-        .popup-content button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: #0078ff;
-            border: none;
-            color: white;
-            border-radius: 6px;
-            cursor: pointer;
-        }
     </style>
 </head>
 
 <body>
-    <!-- Popup -->
-    <div class="popup" id="usernamePopup">
+    <!-- Register Popup -->
+    <div class="popup" id="registerPopup" style="display:none;">
         <div class="popup-content">
-            <h3>Enter your username</h3>
-            <input type="text" id="usernameInput" placeholder="Your name..." />
+            <h3>Register</h3>
+            <input type="text" id="regUsername" placeholder="Username" /><br />
+            <input type="email" id="regEmail" placeholder="Email" /><br />
+            <input type="password" id="regPassword" placeholder="Password" /><br />
+            <button id="registerBtn">Register</button>
             <br />
-            <button id="joinBtn">Join Chat</button>
+            <button id="gotoLogin" style="margin-top:10px; background:none; border:none; color:#0078ff; cursor:pointer;">
+                Already have an account? Login
+            </button>
+        </div>
+    </div>
+
+    <!-- Login Popup -->
+    <div class="popup" id="loginPopup">
+        <div class="popup-content">
+            <h3>Login to Chat</h3>
+            <input type="text" id="loginUsername" placeholder="Username" />
+            <br />
+            <input type="password" id="loginPassword" placeholder="Password" />
+            <br />
+            <button id="loginBtn">Login</button>
+            <br />
+
+            <!-- Forgot password -->
+            <button id="forgotPasswordBtn"
+                style="margin-top:10px; background:none; border:none; color:#0078ff; cursor:pointer;">
+                Forgot Password?
+            </button>
+            <br />
+
+            <!-- Register button -->
+            <button id="gotoRegister"
+                style="margin-top:5px; background:none; border:none; color:#28a745; cursor:pointer;">
+                Don’t have an account? Register
+            </button>
         </div>
     </div>
 
@@ -199,6 +72,18 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
     <script>
+        // Open Register popup
+        $("#gotoRegister").on("click", function() {
+            $("#loginPopup").hide();
+            $("#registerPopup").show();
+        });
+
+        // Back to Login
+        $("#gotoLogin").on("click", function() {
+            $("#registerPopup").hide();
+            $("#loginPopup").show();
+        });
+
         var cur_timestamp = 0;
         let currentUser = null; // dynamic user
 
@@ -299,6 +184,73 @@
             if (e.which === 13) {
                 $("#sendBtn").click();
             }
+        });
+
+        // Login Button Click
+        $("#loginBtn").on("click", function() {
+            const username = $("#loginUsername").val().trim();
+            const password = $("#loginPassword").val().trim();
+
+            if (username === "" || password === "") {
+                alert("Please enter both username and password!");
+                return;
+            }
+
+            // 🚀 Normally, you’d send this to backend to validate login
+            // Example:
+            /*
+            $.ajax({
+              url: "http://127.0.0.1:3000/api/login",
+              method: "POST",
+              contentType: "application/json",
+              data: JSON.stringify({ username, password }),
+              success: function(res) {
+                if (res.status === "success") {
+                  currentUser = username;
+                  $("#loginPopup").hide();
+                  $("#chatContainer").show();
+                } else {
+                  alert("Invalid login");
+                }
+              },
+              error: function() {
+                alert("Login failed");
+              }
+            });
+            */
+
+            // 🔹 For now (no backend login), just accept any input
+            currentUser = username;
+            $("#loginPopup").hide();
+            $("#chatContainer").show();
+        });
+
+        // Forgot Password Click
+        $("#forgotPasswordBtn").on("click", function() {
+            const username = $("#loginUsername").val().trim();
+            if (username === "") {
+                alert("Enter your username first to reset password.");
+                return;
+            }
+
+            $.ajax({
+                url: "http://127.0.0.1:3000/api/forgot-password",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    username
+                }),
+                success: function(res) {
+                    if (res.status === "success") {
+                        alert("Password reset email sent! Check your inbox.");
+                    } else {
+                        alert("No account found with that username.");
+                    }
+                },
+                error: function() {
+                    alert("Failed to send reset email. Try again.");
+                }
+            });
         });
     </script>
 </body>
