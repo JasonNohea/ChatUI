@@ -196,34 +196,73 @@
                 return;
             }
 
-            // 🚀 Normally, you’d send this to backend to validate login
-            // Example:
-            /*
             $.ajax({
-              url: "http://127.0.0.1:3000/api/login",
-              method: "POST",
-              contentType: "application/json",
-              data: JSON.stringify({ username, password }),
-              success: function(res) {
-                if (res.status === "success") {
-                  currentUser = username;
-                  $("#loginPopup").hide();
-                  $("#chatContainer").show();
-                } else {
-                  alert("Invalid login");
+                url: "http://127.0.0.1:3000/api/login",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    username,
+                    password
+                }),
+                success: function(res) {
+                    if (res.status === "success") {
+                        currentUser = username;
+                        $("#loginPopup").hide();
+                        $("#chatContainer").show();
+                    } else {
+                        alert("Invalid login");
+                    }
+                },
+                error: function() {
+                    alert("Login failed");
                 }
-              },
-              error: function() {
-                alert("Login failed");
-              }
             });
-            */
+
 
             // 🔹 For now (no backend login), just accept any input
-            currentUser = username;
+            // currentUser = username;
             $("#loginPopup").hide();
             $("#chatContainer").show();
         });
+
+        // Register Click
+        $("#registerBtn").on("click", function() {
+            const username = $("#regUsername").val().trim();
+            const email = $("#regEmail").val().trim();
+            const password = $("#regPassword").val().trim();
+
+            if (!username || !email || !password) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            $.ajax({
+                url: "http://127.0.0.1:3000/api/register",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    username: username,
+                    email: email,
+                    password: password,
+                }),
+
+                success: function(res) {
+                    if (res.status === "success") {
+                        alert("Registration successful! You can now log in.");
+                        // optionally auto-close popup or show login form
+                        $("#registerPopup").hide();
+                        $("#loginPopup").show();
+                    } else {
+                        alert(res.message || "Registration failed.");
+                    }
+                },
+                error: function(xhr) {
+                    console.error(xhr);
+                    alert("Failed to register. Try again.");
+                }
+            });
+        });
+
 
         // Forgot Password Click
         $("#forgotPasswordBtn").on("click", function() {
