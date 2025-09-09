@@ -28,6 +28,21 @@
         </div>
     </div>
 
+    <!-- Forgot Password Popup -->
+    <div class="popup" id="forgotPopup" style="display:none;">
+        <div class="popup-content">
+            <h3>Forgot Password</h3>
+            <input type="email" id="forgotEmail" placeholder="Enter your email" /><br />
+            <button id="forgotBtn">Reset Password</button>
+            <br />
+            <button id="gotoLoginFromForgot"
+                style="margin-top:10px; background:none; border:none; color:#0078ff; cursor:pointer;">
+                Back to Login
+            </button>
+        </div>
+    </div>
+
+
     <!-- Login Popup -->
     <div class="popup" id="loginPopup">
         <div class="popup-content">
@@ -265,10 +280,10 @@
 
 
         // Forgot Password Click
-        $("#forgotPasswordBtn").on("click", function() {
-            const username = $("#loginUsername").val().trim();
-            if (username === "") {
-                alert("Enter your username first to reset password.");
+        $("#forgotBtn").on("click", function() {
+            const email = $("#forgotEmail").val().trim();
+            if (email === "") {
+                alert("Enter your email first to reset password.");
                 return;
             }
 
@@ -277,19 +292,31 @@
                 method: "POST",
                 contentType: "application/json",
                 data: JSON.stringify({
-                    username
-                }),
+                    email
+                }), // 👈 must send as object {email: ...}
                 success: function(res) {
                     if (res.status === "success") {
                         alert("Password reset email sent! Check your inbox.");
                     } else {
-                        alert("No account found with that username.");
+                        alert(res.message || "No account found with that email.");
                     }
                 },
                 error: function() {
                     alert("Failed to send reset email. Try again.");
                 }
             });
+        });
+
+        // Open Forgot Password popup
+        $("#forgotPasswordBtn").on("click", function() {
+            $("#loginPopup").hide();
+            $("#forgotPopup").show();
+        });
+
+        // Back to Login from Forgot Password
+        $("#gotoLoginFromForgot").on("click", function() {
+            $("#forgotPopup").hide();
+            $("#loginPopup").show();
         });
     </script>
 </body>
